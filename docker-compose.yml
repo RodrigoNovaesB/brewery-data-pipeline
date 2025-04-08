@@ -1,3 +1,5 @@
+version: '3'
+
 services:
   postgres:
     image: postgres:13
@@ -16,12 +18,12 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      PYTHONPATH: /opt/airflow/scripts  # Adicionado
     volumes:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
       - ./tests:/opt/airflow/tests
-      - ./logs:/opt/airflow/logs
     ports:
       - "8080:8080"
     command: webserver
@@ -34,12 +36,12 @@ services:
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
       AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      PYTHONPATH: /opt/airflow/scripts  # Adicionado
     volumes:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./data:/opt/airflow/data
       - ./tests:/opt/airflow/tests
-      - ./logs:/opt/airflow/logs
     command: scheduler
 
 volumes:
