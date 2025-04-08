@@ -172,3 +172,16 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Dados
+data/
+!sample_data/
+
+# Ambiente
+.env
+.venv
+__pycache__
+
+# IDE
+.vscode/
+.idea/
