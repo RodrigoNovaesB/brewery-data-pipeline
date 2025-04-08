@@ -175,7 +175,12 @@ cython_debug/
 
 # Dados
 data/
+!data/.gitkeep
 !sample_data/
+
+# Logs
+logs/
+!logs/.gitkeep
 
 # Ambiente
 .env
@@ -185,3 +190,4 @@ __pycache__
 # IDE
 .vscode/
 .idea/
+
