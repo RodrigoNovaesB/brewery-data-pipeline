@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.exceptions import AirflowFailException
 import requests
 import pandas as pd
 import os
@@ -78,11 +79,33 @@ def aggregate_to_gold():
             index=False
         )
 
+def data_quality_check():
+    import pandas as pd
+    from pathlib import Path
+
+    gold_path = Path('/opt/airflow/data/gold')
+    parquet_files = list(gold_path.glob('*.parquet'))
+    
+    if not parquet_files:
+        raise AirflowFailException("Nenhum arquivo Parquet encontrado na camada Gold")
+
+    df = pd.read_parquet(parquet_files[0])
+
+    checks = [
+        (df.empty, "DataFrame vazio na camada Gold"),
+        (df['count'].isnull().any(), "Valores nulos na coluna 'count'"),
+        ((df['count'] <= 0).any(), "Contagem inválida (<= 0)")
+    ]
+
+    for condition, error_msg in checks:
+        if condition:
+            raise AirflowFailException(f"Falha na qualidade dos dados: {error_msg}")
+
 with DAG(
     'brewery_data_pipeline',
     default_args=default_args,
     description='A pipeline to process brewery data',
-    schedule_interval='@daily',
+    schedule_interval='0 0 * * *',
     catchup=False,
 ) as dag:
     
@@ -102,3 +125,11 @@ with DAG(
     )
     
     extract_task >> transform_task >> aggregate_task
+
+    quality_check = PythonOperator(
+    task_id='data_quality_check',
+    python_callable=data_quality_check,
+    dag=dag
+    )
+
+    aggregate_task >> quality_check
